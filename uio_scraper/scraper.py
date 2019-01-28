@@ -1,3 +1,9 @@
+"""
+Script for searching UiO courses for course titles matching the search query
+"""
+
+
+
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -7,6 +13,13 @@ UIO_URL = "https://www.uio.no"
 
 
 def get_matching_courses_description_links(query, course_list):
+    """
+    Filters out the courses with titles matching the query text
+
+    :param query: text to search for in course title
+    :param course_list: list of course page html elements
+    :return: mapping of course name and link to description
+    """
 
     course_name_and_link = {}
 
@@ -24,14 +37,25 @@ def get_matching_courses_description_links(query, course_list):
 
 
 def get_page_courses():
+    """
+    Fetches html elements containing UiO course titles and links to descriptions
+
+    :return: list of UiO course page html elements
+    """
     with requests.request("get", "https://www.uio.no/studier/program/") as page:
         soup = BeautifulSoup(page.content, features="html.parser")
-        couse_list = soup.find_all("li", id=re.compile('^vrtx-program-[0-9]*'))
+        course_list = soup.find_all("li", id=re.compile('^vrtx-program-[0-9]*'))
 
-    return couse_list
+    return course_list
 
 
 def get_course_description(url):
+    """
+    Fetches the desctiption text form the link page
+
+    :param url: url to course description page
+    :return: str with course description if successful
+    """
 
     try:
         course_page = requests.request("get", url).content
@@ -43,8 +67,14 @@ def get_course_description(url):
         return "[Page could not be found]"
 
 
-def print_result(page_desc_map):
-    for course, (link, desc) in page_desc_map.items():
+def print_result(course_result_map):
+    """
+    Prints the result data to stdout
+
+    :param course_result_map: Mapping of course name and the tuple containing link to description page and description
+    :return: None
+    """
+    for course, (link, desc) in course_result_map.items():
         print()
         print(f"[{course}]")
         print(f"Link: {link}")
@@ -53,6 +83,12 @@ def print_result(page_desc_map):
 
 
 def create_result_map(course_link_map):
+    """
+    Creates the result dictionary with course name and description link and description text
+
+    :param course_link_map: mapping of course name and link to description
+    :return: mapping of key: course name and value: (description link, description text)
+    """
     page_desc_map = {}
     for course, link in course_link_map.items():
         page_desc_map[course] = (link, get_course_description(link)) # dict with a tuple of link, description as value
@@ -60,15 +96,20 @@ def create_result_map(course_link_map):
 
 
 def get_cli_argument():
+    """
+    Returns the first argument from the user
+
+    :return: str of the first argument
+    """
     return sys.argv[1]
 
 
 if __name__ == "__main__":
-    query = get_cli_argument()
-    course_list = get_page_courses()
-    course_link_map = get_matching_courses_description_links(query, course_list)
-    result_map = create_result_map(course_link_map)
-    print_result(result_map)
+    query = get_cli_argument() # get the user query text
+    course_list = get_page_courses() # get list of html elements from all UiO courses
+    course_link_map = get_matching_courses_description_links(query, course_list) # create dict of course name and link to dessctiption
+    result_map = create_result_map(course_link_map) # add the description text from the link to the dict
+    print_result(result_map) # print result to the terminal/commandline
 
 
 
