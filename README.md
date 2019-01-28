@@ -1,4 +1,4 @@
-# UIO Courses Webscraper
+# UiO Courses Webscraper
 
 ## Use
 
