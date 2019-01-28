@@ -2,7 +2,7 @@
 
 ## Use
 
-`` bash
+````bash
 
 git clone https://github.com/sonhal/web-scraper.git
 cd web-scraper
@@ -11,4 +11,4 @@ cd uio_scraper
 
 python -m scraper <text to search for>
 
-```
+````
